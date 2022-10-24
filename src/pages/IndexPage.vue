@@ -1,42 +1,102 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component>
+  <q-page class="row items-center justify-evenly" padding>
+    <q-table
+      class="table"
+      row-key="ID"
+      v-model:pagination="pagination"
+      :rows="rows"
+      :columns="columns"
+      :rows-per-page-options="[0]"
+      :table-colspan="columns.length + 1"
+      virtual-scroll
+      @virtual-scroll="onScroll"
+    >
+      <template v-slot:header="props">
+        <q-tr :props="props">
+          <q-th v-for="col in props.cols" :key="col.name" :props="props">
+            {{ col.label }}
+          </q-th>
+          <q-th class="text-left">Actions</q-th>
+        </q-tr>
+      </template>
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td v-for="col in props.cols" :key="col.name" :props="props">{{ col.value }}</q-td>
+          <q-td class="text-left">
+            <a href="#">Edit </a>
+            <a href="#">Remove</a>
+          </q-td>
+        </q-tr>
+      </template>
+    </q-table>
   </q-page>
 </template>
 
-<script setup lang="ts">
-import { Todo, Meta } from 'components/models';
-import ExampleComponent from 'components/ExampleComponent.vue';
-import { ref } from 'vue';
+<script lang="ts" setup>
+import { computed, reactive } from 'vue'
+import { useOrderItemStore } from 'stores/order-item-store'
+import { OrderItemEndpoint } from 'src/types'
 
-const todos = ref<Todo[]>([
+const orderItemStore = useOrderItemStore()
+orderItemStore.fetch()
+
+const columns = [
   {
-    id: 1,
-    content: 'ct1'
+    name: 'partName',
+    label: 'Part Name',
+    align: 'left',
+    field: (row: OrderItemEndpoint) => row.part.Name,
   },
   {
-    id: 2,
-    content: 'ct2'
+    name: 'transactionType',
+    label: 'Transaction Type',
+    align: 'left',
+    field: (row: OrderItemEndpoint) => row.order.transactionType.Name,
   },
   {
-    id: 3,
-    content: 'ct3'
+    name: 'date',
+    label: 'Date',
+    align: 'left',
+    field: (row: OrderItemEndpoint) => row.order.Date,
   },
   {
-    id: 4,
-    content: 'ct4'
+    name: 'amount',
+    label: 'Amount',
+    align: 'left',
+    field: (row: OrderItemEndpoint) => row.Amount,
   },
   {
-    id: 5,
-    content: 'ct5'
+    name: 'source',
+    label: 'Source',
+    align: 'left',
+    field: (row: OrderItemEndpoint) => row.order.sourceWarehouse?.Name || '-',
+  },
+  {
+    name: 'destination',
+    label: 'Destination',
+    align: 'left',
+    field: (row: OrderItemEndpoint) => row.order.destinationWarehouse?.Name,
+  },
+]
+
+const pagination = reactive({ rowsPerPage: 0, page: 1 })
+
+const rows = computed<OrderItemEndpoint[]>(() => <OrderItemEndpoint[]>orderItemStore.items)
+
+function onScroll(details: { index: number }): void {
+  /** Пропускаем выполнение, если данные не загружены */
+  if (rows.value.length === 0) return
+
+  /** Загружаем новые данные, если пользователь в конце таблицы */
+  if (details.index >= rows.value.length - 5 && details.index <= rows.value.length) {
+    orderItemStore.pagination.page++
+    orderItemStore.fetch()
   }
-]);
-const meta = ref<Meta>({
-  totalCount: 1200
-});
+}
 </script>
+
+<style lang="sass" scoped>
+.table
+  width: 70%
+  height: 400px
+</style>
