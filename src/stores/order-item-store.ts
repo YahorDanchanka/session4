@@ -35,5 +35,11 @@ export const useOrderItemStore = defineStore('order-item', () => {
     })
   }
 
-  return { items, pagination, fetch }
+  function insert(orderItem: Omit<OrderItem, 'ID'>) {
+    return new Promise((resolve, reject) => {
+      api.post('/order-item', orderItem).then(resolve).catch(reject)
+    })
+  }
+
+  return { items, pagination, fetch, insert }
 })

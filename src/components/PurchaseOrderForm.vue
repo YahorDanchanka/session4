@@ -164,7 +164,13 @@ function addPartItem(): void {
   const part = find(parts.value, ['ID', formData.partID])
   if (!part) return
 
-  const addedPartItem = { partName: part.Name, batchNumber: formData.batchNumber, amount: formData.amount }
+  const addedPartItem = { id: part.ID, partName: part.Name, batchNumber: formData.batchNumber, amount: formData.amount }
+
+  /** Количество не должно быть пустым */
+  if (!formData.amount) {
+    $q.notify({ type: 'negative', message: 'The amount must not be empty' })
+    return
+  }
 
   /** Список может содержать несколько деталей с одинаковыми названиями, только если они имеют разные номера партий */
   const hasDuplicatePart: boolean = !!find(formData.partsList, {

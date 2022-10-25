@@ -46,6 +46,7 @@ export type OrderItemEndpoint = OrderItem & {
 
 export namespace PurchaseOrderForm {
   export interface PartItem {
+    id: number
     partName: string
     batchNumber: string
     amount: Decimal
