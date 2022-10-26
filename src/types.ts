@@ -44,9 +44,19 @@ export type OrderItemEndpoint = OrderItem & {
   part: Part
 }
 
+export type OrderEndpoint = Order & {
+  transactionType: TransactionType
+  sourceWarehouse: Warehouse | null
+  destinationWarehouse: Warehouse | null
+  orderItems: (OrderItem & {
+    part: Part
+  })[]
+}
+
 export namespace PurchaseOrderForm {
   export interface PartItem {
-    id: number
+    orderItemID?: number
+    partID: number
     partName: string
     batchNumber: string
     amount: Decimal

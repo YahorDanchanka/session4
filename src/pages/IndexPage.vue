@@ -29,7 +29,7 @@
             {{ col.value }}
           </q-td>
           <q-td class="text-left">
-            <a href="#">Edit </a>
+            <router-link :to="{ name: 'editPurchaseOrder', params: { id: props.row.ID } }"> Edit </router-link>
             <a href="#" @click.prevent="onRemove(props.row)">Remove</a>
           </q-td>
         </q-tr>

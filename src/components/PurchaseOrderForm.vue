@@ -102,7 +102,7 @@
 
 <script lang="ts" setup>
 import { computed, reactive, watch } from 'vue'
-import { OrderItem, Part, PurchaseOrderForm, Supplier, Warehouse } from 'src/types'
+import { OrderEndpoint, Part, PurchaseOrderForm, Supplier, Warehouse } from 'src/types'
 import { useSupplierStore } from 'stores/supplier-store'
 import { useWarehouseStore } from 'stores/warehouse-store'
 import { usePartStore } from 'stores/part-store'
@@ -110,9 +110,10 @@ import { cloneDeep, filter, find } from 'lodash'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import PartItem = PurchaseOrderForm.PartItem
+import { useOrderItemStore } from 'stores/order-item-store'
 
 const emit = defineEmits(['submit'])
-defineProps<{ orderItem?: OrderItem }>()
+const props = defineProps<{ order?: OrderEndpoint }>()
 
 const $q = useQuasar()
 const router = useRouter()
@@ -122,6 +123,7 @@ const warehouseStore = useWarehouseStore()
 warehouseStore.fetch()
 const partStore = usePartStore()
 partStore.fetch()
+const orderItemStore = useOrderItemStore()
 
 const columns = [
   {
@@ -145,13 +147,13 @@ const columns = [
 ]
 
 const formData = reactive<PurchaseOrderForm.FormData>({
-  supplierID: 1,
-  warehouseID: 1,
-  date: '',
+  supplierID: props.order?.SupplierID || 1,
+  warehouseID: props.order?.DestinationWarehouseID || 1,
+  date: props.order?.Date || '',
   partID: 1,
   batchNumber: '',
   amount: '',
-  partsList: [],
+  partsList: initPartsList(),
 })
 
 const suppliers = computed<Supplier[]>(() => supplierStore.suppliers)
@@ -160,11 +162,31 @@ const parts = computed<Part[]>(() => partStore.parts)
 const selectedPart = computed<Part | undefined>(() => find(parts.value, ['ID', formData.partID]))
 const isBatchNumberFieldDisabled = computed<boolean>(() => !selectedPart.value?.BatchNumberHasRequired)
 
+/** Возвращает массив partsList, если в параметре orderItem имеются значения */
+function initPartsList(): PartItem[] {
+  return props.order
+    ? props.order.orderItems.map((orderItem) => {
+        return {
+          orderItemID: orderItem.ID,
+          partID: orderItem.PartID,
+          partName: orderItem.part.Name,
+          batchNumber: orderItem.BatchNumber || '',
+          amount: orderItem.Amount,
+        }
+      })
+    : []
+}
+
 function addPartItem(): void {
   const part = find(parts.value, ['ID', formData.partID])
   if (!part) return
 
-  const addedPartItem = { id: part.ID, partName: part.Name, batchNumber: formData.batchNumber, amount: formData.amount }
+  const addedPartItem = {
+    partID: part.ID,
+    partName: part.Name,
+    batchNumber: formData.batchNumber,
+    amount: formData.amount,
+  }
 
   /** Количество не должно быть пустым */
   if (!formData.amount) {
@@ -186,7 +208,11 @@ function addPartItem(): void {
   formData.partsList.push(addedPartItem)
 }
 
-function removePart(partItem: PartItem): void {
+async function removePart(partItem: PartItem) {
+  if (partItem.orderItemID) {
+    await orderItemStore.remove(partItem.orderItemID)
+  }
+
   formData.partsList = filter(formData.partsList, (o) => o !== partItem)
 }
 
