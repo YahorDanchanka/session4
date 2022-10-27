@@ -59,6 +59,7 @@ function onSubmit(formData: WarehouseManagementFormT.FormData): void {
 
 onUnmounted(() => {
   orderItemStore.items = []
+  orderStore.orders = []
 })
 </script>
 
