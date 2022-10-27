@@ -1,6 +1,19 @@
-import { RouteRecordRaw } from 'vue-router'
+import { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
 import { useOrderItemStore } from 'stores/order-item-store'
 import { useOrderStore } from 'stores/order-store'
+
+async function loadOrder(to: RouteLocationNormalized) {
+  const orderItemStore = useOrderItemStore()
+  const orderStore = useOrderStore()
+  const id = +(<number>(<unknown>to.params['id']))
+
+  try {
+    await orderItemStore.fetch(id)
+    await orderStore.fetch(orderItemStore.findByID(id)!.OrderID)
+  } catch (error) {
+    return { name: 'inventoryManagement' }
+  }
+}
 
 const routes: RouteRecordRaw[] = [
   {
@@ -13,23 +26,18 @@ const routes: RouteRecordRaw[] = [
         name: 'editPurchaseOrder',
         path: 'edit-purchase-order/:id(\\d+)',
         component: () => import('pages/EditPurchaseOrderPage.vue'),
-        async beforeEnter(to) {
-          const orderItemStore = useOrderItemStore()
-          const orderStore = useOrderStore()
-          const id = +(<number>(<unknown>to.params['id']))
-
-          try {
-            await orderItemStore.fetch(id)
-            await orderStore.fetch(orderItemStore.findByID(id)!.OrderID)
-          } catch (error) {
-            return { name: 'inventoryManagement' }
-          }
-        },
+        beforeEnter: loadOrder,
       },
       {
         name: 'warehouseManagement',
         path: 'warehouse-management',
         component: () => import('pages/WarehouseManagementPage.vue'),
+      },
+      {
+        name: 'editWarehouseManagement',
+        path: 'warehouse-management/:id(\\d+)',
+        component: () => import('pages/EditWarehouseManagementPage.vue'),
+        beforeEnter: loadOrder,
       },
     ],
   },

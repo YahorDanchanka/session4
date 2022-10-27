@@ -29,7 +29,15 @@
             {{ col.value }}
           </q-td>
           <q-td class="text-left">
-            <router-link :to="{ name: 'editPurchaseOrder', params: { id: props.row.ID } }"> Edit </router-link>
+            <router-link
+              v-if="props.row.order.TransactionTypeID === 1"
+              :to="{ name: 'editPurchaseOrder', params: { id: props.row.ID } }"
+            >
+              Edit
+            </router-link>
+            <router-link v-else :to="{ name: 'editWarehouseManagement', params: { id: props.row.ID } }">
+              Edit
+            </router-link>
             <a href="#" @click.prevent="onRemove(props.row)">Remove</a>
           </q-td>
         </q-tr>
