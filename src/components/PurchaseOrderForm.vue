@@ -61,7 +61,7 @@
               step="0.01"
               label="Amount"
               v-model="formData.amount"
-              :rules="[(val) => (parseFloat(val) && parseFloat(val) >= 1) || 'Type positive number']"
+              :rules="[(val) => (val ? parseFloat(val) >= 1 : true) || 'Type positive number']"
               hide-bottom-space
             />
           </div>
@@ -209,6 +209,14 @@ function addPartItem(): void {
 }
 
 async function removePart(partItem: PartItem) {
+  if (formData.partsList.length <= 1) {
+    $q.notify({
+      type: 'negative',
+      message: 'You can not remove parts that would make the inventory for the warehouse negative',
+    })
+    return
+  }
+
   if (partItem.orderItemID) {
     await orderItemStore.remove(partItem.orderItemID)
   }
