@@ -50,7 +50,9 @@
 import { computed } from 'vue'
 import { useOrderItemStore } from 'stores/order-item-store'
 import { OrderItemEndpoint } from 'src/types'
+import { useQuasar } from 'quasar'
 
+const $q = useQuasar()
 const orderItemStore = useOrderItemStore()
 orderItemStore.fetch()
 
@@ -113,7 +115,26 @@ function onScroll(details: { index: number }): void {
 }
 
 function onRemove(orderItem: OrderItemEndpoint): void {
-  console.log(orderItem)
+  const orderID = orderItem.OrderID
+  orderItemStore.filterByOrderID(orderID).then((items) => {
+    const canDelete = items.data.length > 1
+
+    if (canDelete) {
+      orderItemStore
+        .remove(orderItem.ID)
+        .then(() => {
+          $q.notify({ type: 'positive', message: 'Purchase Order deleted' })
+        })
+        .catch(() => {
+          $q.notify({ type: 'negative', message: 'Something went wrong' })
+        })
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: 'You can not remove parts that would make the inventory for the warehouse negative',
+      })
+    }
+  })
 }
 </script>
 

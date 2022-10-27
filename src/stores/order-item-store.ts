@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { OrderItem, OrderItemEndpoint } from 'src/types'
 import { api } from 'boot/axios'
 import { AxiosResponse } from 'axios'
-import { find, unionBy } from 'lodash'
+import { filter, find, unionBy } from 'lodash'
 
 export interface Pagination {
   page: number
@@ -53,7 +53,13 @@ export const useOrderItemStore = defineStore('order-item', () => {
 
   function remove(id: number) {
     return new Promise((resolve, reject) => {
-      api.delete(`/order-item/${id}`).then(resolve).catch(reject)
+      api
+        .delete(`/order-item/${id}`)
+        .then((response) => {
+          items.value = filter(items.value, (o) => o.ID !== id)
+          resolve(response)
+        })
+        .catch(reject)
     })
   }
 
@@ -61,5 +67,22 @@ export const useOrderItemStore = defineStore('order-item', () => {
     return find(items.value, ['ID', +id])
   }
 
-  return { items, pagination, fetch, insert, remove, findByID }
+  function filterByOrderID(orderID: number): Promise<AxiosResponse<OrderItem[]>> {
+    return new Promise((resolve, reject) => {
+      api
+        .get('/order-item/', {
+          params: {
+            filter: {
+              OrderID: {
+                eq: orderID,
+              },
+            },
+          },
+        })
+        .then(resolve)
+        .catch(reject)
+    })
+  }
+
+  return { items, pagination, fetch, insert, remove, findByID, filterByOrderID }
 })
