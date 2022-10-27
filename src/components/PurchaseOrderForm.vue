@@ -218,7 +218,7 @@ async function removePart(partItem: PartItem) {
   }
 
   if (partItem.orderItemID) {
-    await orderItemStore.remove(partItem.orderItemID)
+    await orderItemStore.remove(partItem.orderItemID, false)
   }
 
   formData.partsList = filter(formData.partsList, (o) => o !== partItem)

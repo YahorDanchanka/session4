@@ -51,12 +51,15 @@ export const useOrderItemStore = defineStore('order-item', () => {
     })
   }
 
-  function remove(id: number) {
+  function remove(id: number, mutate: boolean = true) {
     return new Promise((resolve, reject) => {
       api
         .delete(`/order-item/${id}`)
         .then((response) => {
-          items.value = filter(items.value, (o) => o.ID !== id)
+          if (mutate) {
+            items.value = filter(items.value, (o) => o.ID !== id)
+          }
+
           resolve(response)
         })
         .catch(reject)
