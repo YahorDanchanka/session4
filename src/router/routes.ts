@@ -26,6 +26,11 @@ const routes: RouteRecordRaw[] = [
           }
         },
       },
+      {
+        name: 'warehouseManagement',
+        path: 'warehouse-management',
+        component: () => import('pages/WarehouseManagementPage.vue'),
+      },
     ],
   },
   {

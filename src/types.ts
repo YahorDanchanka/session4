@@ -72,3 +72,23 @@ export namespace PurchaseOrderForm {
     partsList: PartItem[]
   }
 }
+
+export namespace WarehouseManagementForm {
+  export interface PartItem {
+    orderItemID?: number
+    partID: number
+    partName: string
+    batchNumber: string
+    amount: Decimal
+  }
+
+  export interface FormData {
+    sourceWarehouseID: number
+    destinationWarehouseID: number
+    date: string
+    partID: number
+    batchNumber: string
+    amount: Decimal
+    partsList: PartItem[]
+  }
+}
