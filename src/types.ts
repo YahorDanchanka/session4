@@ -92,3 +92,17 @@ export namespace WarehouseManagementForm {
     partsList: PartItem[]
   }
 }
+
+export namespace InventoryReport {
+  export interface FormData {
+    warehouseID: number
+    inventoryType: string
+  }
+
+  export type Endpoint = OrderItem & {
+    part: Part
+    partCount: number
+    currentStock: number
+    receivedStock: number
+  }
+}

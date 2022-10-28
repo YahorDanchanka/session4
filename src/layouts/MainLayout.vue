@@ -8,7 +8,7 @@
         <div class="cursor-pointer q-mr-sm" @click="router.push({ name: 'warehouseManagement' })">
           Warehouse Management
         </div>
-        <div class="cursor-pointer">Inventory Report</div>
+        <div class="cursor-pointer" @click="router.push({ name: 'inventoryReport' })">Inventory Report</div>
       </q-bar>
     </q-header>
     <q-page-container>

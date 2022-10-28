@@ -39,6 +39,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/EditWarehouseManagementPage.vue'),
         beforeEnter: loadOrder,
       },
+      { name: 'inventoryReport', path: 'inventory-report', component: () => import('pages/InventoryReportPage.vue') },
     ],
   },
   {
